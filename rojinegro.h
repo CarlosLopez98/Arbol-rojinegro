@@ -10,11 +10,15 @@ struct nodo{
 };
 
 class Rojinegro{
-	nodo *raiz;
+	nodo *raiz, *centinela;
 
 	public:
 		Rojinegro(){
 			raiz = NULL;
+			centinela = new nodo;
+			centinela->dato = 0;
+			centinela->color = 1;
+			centinela->izq = centinela->der = centinela->padre = NULL;
 		}
 		~Rojinegro();
 
@@ -37,6 +41,9 @@ class Rojinegro{
 
 		void ajustarInsercion(nodo*);
 		void ajustarSupresion(nodo*);
+
+		nodo* abuelo(nodo*);
+		nodo* tio(nodo*);
 };
 
 nodo* Rojinegro::buscar_arbol(int dato, nodo *hijo, nodo *padre){
@@ -54,55 +61,38 @@ nodo* Rojinegro::buscar_arbol(int dato, nodo *hijo, nodo *padre){
 	}
 }
 
-int Rojinegro::ins_arbol(int n){
-	/*
-	Caso 1: Padre y tio de X son rojos
-	Sol 1: Cambiar color padre, tio y abuelo
-
-	Caso 2: Padre rojo, Tio negro, X y el tio son hijos del mismo lado
-	Sol 2: Rotacion sencilla hacia el lado contrario de X
-
-	Caso 3: Padre rojo, T negro, X y el tio son hijos del lado contrario
-	Sol 3: Padre y abuelo cambian color y luego se rota sobre el abuelo hacia el tio
-	*/
-
+int Rojinegro::ins_arbol(int dato){
 	nodo *padre;
 	if(raiz == NULL){
 		raiz = new nodo;
-		raiz->dato = n;
+		raiz->dato = dato;
 		raiz->color = 1;
 		raiz->izq = raiz->der = raiz->padre = NULL;
 		return 0;
 	}
 
-	padre = buscar_arbol(n, raiz, NULL);
+	padre = buscar_arbol(dato, raiz, NULL);
 	if(padre == NULL) return -1;
 	nodo *nuevo;
 	nuevo = new nodo;
-	nuevo->dato = n;
+	nuevo->dato = dato;
 	nuevo->color = 0;
 	nuevo->izq = nuevo->der = NULL;
 	nuevo->padre = padre;
 
-	if(n<padre->dato)
+	if(dato<padre->dato)
         padre->izq = nuevo;
     else
      	padre->der = nuevo;
 
-    nodo *tio;
-
-
-    // Correccion de padre rojo, hijo rojo
-    if(padre->color == 0){
-    	// caso 1
-    	
-    }
+    // Correccion
+    if(padre->color == 0) ajustarInsercion(nuevo);
 
     return 0;
 }
 
 void Rojinegro::borrar_nodo(nodo *padre, nodo *hijo){
-	nodo  *r, *s,*t;
+	nodo *r, *s, *t;
 	if (hijo->izq==NULL) r=hijo->der;
 	else if (hijo->der==NULL) r=hijo->izq;
 	else{
@@ -125,6 +115,8 @@ void Rojinegro::borrar_nodo(nodo *padre, nodo *hijo){
 	else if (hijo==padre->izq) padre->izq =r;
 	else padre->der = r;
 
+	if(hijo->color == 1) ajustarSupresion(hijo);
+
 	delete hijo;
 }
 
@@ -146,7 +138,7 @@ nodo *Rojinegro::buscar(int n, nodo **hijo, nodo *padre){
 
 int Rojinegro::retira_arbol(int n){
 	nodo *padre, *hijo=raiz;
-	padre=buscar(n,&hijo,NULL);
+	padre = buscar(n,&hijo,NULL);
 	if(hijo==NULL) return -1;
 	borrar_nodo(padre,hijo);
 	return 0;
@@ -181,7 +173,7 @@ void Rojinegro::destruir(nodo *hijo){
     	destruir(hijo->izq);
     	destruir(hijo->der);
     	delete hijo;
-    	cout<<"nodo destruido..."<< endl;
+    	//cout<<"nodo destruido..."<< endl;
     }
 }
 
@@ -230,7 +222,53 @@ void Rojinegro::rotar_der(nodo* pivote){
 }
 
 void Rojinegro::ajustarInsercion(nodo* x){
+	nodo *tio;
+	while(x != raiz && x->padre->color == 0){
+		if(x->padre == x->padre->padre->izq){
+			tio = x->padre->padre->der;
+			if(tio == NULL) tio = centinela;
+			if(tio->color == 0){
+				// Caso 1
+				x->padre->color = 1;
+				tio->color = 1;
+				x->padre->padre->color = 0;
+				x = x->padre->padre;
+			}else{
+				if(x == x->padre->der){
+					// Caso 2
+					x = x->padre;
+					rotar_izq(x);
+				}
+				// Caso 3
+				x->padre->color = 1;
+				x->padre->padre->color = 0;
+				rotar_der(x->padre->padre);
 
+			}
+		}else{
+			tio = x->padre->padre->izq;
+			if(tio == NULL) tio = centinela;
+			if(tio->color == 0){
+				// Caso 1
+				x->padre->color = 1;
+				tio->color = 1;
+				x->padre->padre->color = 0;
+				x = x->padre->padre;
+			}else{
+				if(x == x->padre->izq){
+					// Caso 2
+					x = x->padre;
+					rotar_der(x);
+				}
+				// Caso 3
+				x->padre->color = 1;
+				x->padre->padre->color = 0;
+				rotar_izq(x->padre->padre);
+
+			}	
+		}
+	}
+	raiz->color = 1;
 }
 
 void Rojinegro::ajustarSupresion(nodo* x){
@@ -238,6 +276,7 @@ void Rojinegro::ajustarSupresion(nodo* x){
 	while(x != raiz && x->color == 1){
 		if(x == x->padre->izq){
 			hermano = x->padre->der;
+			if(hermano == NULL) hermano = centinela;
 			if(hermano->color = 0){
 				// Caso 1
 				hermano->color = 1;
@@ -295,6 +334,21 @@ void Rojinegro::ajustarSupresion(nodo* x){
 		}
 	}
 	x->color = 1;
+}
+
+nodo* Rojinegro::abuelo(nodo *hijo){
+	if((hijo != NULL) && (hijo->padre != NULL))
+		return hijo->padre->padre;
+	else
+		return NULL;
+}
+
+nodo* Rojinegro::tio(nodo *hijo){
+	nodo *aux = abuelo(hijo);
+	if(hijo->padre == aux->izq)
+		return aux->der;
+	else
+		return aux->izq;
 }
 
 #endif
