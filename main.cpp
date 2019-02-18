@@ -9,10 +9,11 @@ int main(){
 
 	arbol.ins_arbol(100);
 	arbol.ins_arbol(150);
-	arbol.ins_arbol(100);
-	arbol.ins_arbol(20);
+	arbol.ins_arbol(50);
+	arbol.ins_arbol(120);
+	arbol.ins_arbol(170);
 
-	arbol.inorden(arbol.raiz_arbol());
+	arbol.rotar_izq(arbol.raiz_arbol()->der);
 
 	return 0;
 }

@@ -95,7 +95,7 @@ int Rojinegro::ins_arbol(int n){
     // Correccion de padre rojo, hijo rojo
     if(padre->color == 0){
     	// caso 1
-    	if()
+    	
     }
 
     return 0;
@@ -193,8 +193,10 @@ void Rojinegro::rotar_izq(nodo* pivote){
 	nodo *aux = raiz;
 	if(pivote->padre != NULL && pivote->padre->der == pivote){
 		aux = pivote->padre->der;
+		pivote->padre->der = aux->der;
 	}else if(pivote->padre != NULL && pivote->padre->izq == pivote){
 		aux = pivote->padre->izq;
+		pivote->padre->izq = aux->der;
 	}
 
 	aux = pivote->der;
@@ -204,14 +206,17 @@ void Rojinegro::rotar_izq(nodo* pivote){
 	aux->izq = pivote;
 
 	if(pivote->der != NULL) pivote->der->padre = pivote;
+	if(aux->padre == NULL) raiz = aux;
 }
 
 void Rojinegro::rotar_der(nodo* pivote){
 	nodo *aux = raiz;
 	if(pivote->padre != NULL && pivote->padre->izq == pivote){
 		aux = pivote->padre->izq;
+		pivote->padre->der = aux->der;
 	}else if(pivote->padre != NULL && pivote->padre->der == pivote){
 		aux = pivote->padre->der;
+		pivote->padre->izq = aux->der;
 	}
 
 	aux = pivote->izq;
@@ -221,6 +226,7 @@ void Rojinegro::rotar_der(nodo* pivote){
 	aux->der = pivote;
 
 	if(pivote->izq != NULL) pivote->izq->padre = pivote;
+	if(aux->padre == NULL) raiz = aux;
 }
 
 void Rojinegro::ajustarInsercion(nodo* x){
@@ -239,7 +245,7 @@ void Rojinegro::ajustarSupresion(nodo* x){
 				rotar_izq(x->padre);
 				hermano = x->padre->der;
 			}
-			if(hermano->izq->color = 1 && hermano->der->color = 1){
+			if(hermano->izq->color == 1 && hermano->der->color == 1){
 				// Caso 2
 				hermano->color = 0;
 				x = x->padre;
@@ -267,7 +273,7 @@ void Rojinegro::ajustarSupresion(nodo* x){
 				rotar_der(x->padre);
 				hermano = x->padre->izq;
 			}
-			if(hermano->izq->color = 1 && hermano->der->color = 1){
+			if(hermano->izq->color == 1 && hermano->der->color == 1){
 				// Caso 2
 				hermano->color = 0;
 				x = x->padre;
