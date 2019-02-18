@@ -189,8 +189,39 @@ Rojinegro::~Rojinegro( ) {
 	destruir(raiz);
 }
 
-void Rojinegro::rotar_izq(nodo* pivote){}
-void Rojinegro::rotar_der(nodo* pivote){}
+void Rojinegro::rotar_izq(nodo* pivote){
+	nodo *aux = raiz;
+	if(pivote->padre != NULL && pivote->padre->der == pivote){
+		aux = pivote->padre->der;
+	}else if(pivote->padre != NULL && pivote->padre->izq == pivote){
+		aux = pivote->padre->izq;
+	}
+
+	aux = pivote->der;
+	aux->padre = pivote->padre;
+	pivote->padre = aux;
+	pivote->der = aux->izq;
+	aux->izq = pivote;
+
+	if(pivote->der != NULL) pivote->der->padre = pivote;
+}
+
+void Rojinegro::rotar_der(nodo* pivote){
+	nodo *aux = raiz;
+	if(pivote->padre != NULL && pivote->padre->izq == pivote){
+		aux = pivote->padre->izq;
+	}else if(pivote->padre != NULL && pivote->padre->der == pivote){
+		aux = pivote->padre->der;
+	}
+
+	aux = pivote->izq;
+	aux->padre = pivote->padre;
+	pivote->padre = aux;
+	pivote->izq = aux->der;
+	aux->der = pivote;
+
+	if(pivote->izq != NULL) pivote->izq->padre = pivote;
+}
 
 void Rojinegro::ajustarInsercion(nodo* x){
 
