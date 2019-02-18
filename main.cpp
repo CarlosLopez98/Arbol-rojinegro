@@ -7,10 +7,12 @@ int main(){
 
 	Rojinegro arbol;
 
-	bool n;
-	cout << n << endl;
-
 	arbol.ins_arbol(100);
+	arbol.ins_arbol(150);
+	arbol.ins_arbol(100);
+	arbol.ins_arbol(20);
+
+	arbol.inorden(arbol.raiz_arbol());
 
 	return 0;
 }
